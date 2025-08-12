@@ -1,20 +1,20 @@
 'use client';
 
-import React, {Usable, useEffect} from "react";
+import React, {useEffect} from "react";
 import {ItemsApi, OrderItemsApi, OrdersApi, PaymentsApi, TagsApi} from "@/lib/gen/apis";
 import Config from "@/lib/config";
 import {GetItemResponse, GetOrderItemResponse, GetOrderResponse, GetTagResponse} from "@/lib/gen/models";
 import {ResponseError} from "@/lib/gen/runtime";
-import {useRouter} from "next/navigation";
+import {useParams, useRouter} from "next/navigation";
 import OrderItemCard from "@/components/ui/OrderItemCard";
 import Link from "next/link";
 import {Button, Form, Modal} from "react-bootstrap";
 import ItemCard from "@/components/ui/ItemCard";
 
-export default async function OrderPage({params}:{params: Promise<{id:string}>}): Promise<React.JSX.Element> {
+export default function OrderPage(): React.JSX.Element {
     const router = useRouter();
 
-    const id = parseInt((await params).id);
+    const id = parseInt(useParams().id as string || "NaN")
 
     const [loading, setLoading] = React.useState<boolean>(true);
     const [order, setOrder] = React.useState<GetOrderResponse>({});
