@@ -2,7 +2,7 @@
 
 import React, {useEffect} from "react";
 import {GetItemResponse, Tag} from "@/lib/gen/models";
-import ItemCard from "@/components/ui/itemCard";
+import ItemCard from "@/components/ui/ItemCard";
 import Config from "@/lib/config";
 import {ItemsApi, TagsApi} from "@/lib/gen/apis";
 import {ResponseError} from "@/lib/gen/runtime";

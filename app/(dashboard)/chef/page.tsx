@@ -3,7 +3,7 @@
 import React, {useEffect} from "react";
 import {GetOrderItemsByStatusRequest, GetOrderItemsRequest, OrderItemsApi} from "@/lib/gen/apis";
 import {GetOrderItemResponse} from "@/lib/gen/models";
-import PendingItemCard from "@/components/ui/pendingItemCard";
+import PendingItemCard from "@/components/ui/PendingItemCard";
 import Config from "@/lib/config";
 
 export default function ChefPage(): React.JSX.Element {

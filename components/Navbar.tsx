@@ -30,6 +30,8 @@ export default function Navbar(): React.JSX.Element {
 
         setRole(parsedRole);
 
+        const name = localStorage.getItem("username");
+
         const fetchData = async (id: number) => {
             const client = new UsersApi(Config);
             try {
@@ -56,7 +58,11 @@ export default function Navbar(): React.JSX.Element {
             }
         };
 
-        fetchData(parsedUserId);
+        if (!name) {
+            fetchData(parsedUserId);
+        } else {
+            setUsername(name);
+        }
     }, [router]);
 
     const signOut = () => {
@@ -69,9 +75,6 @@ export default function Navbar(): React.JSX.Element {
     const changeRoles = async () => {
     };
 
-    if (!isMounted) {
-        return <></>;
-    }
     return (
         <>
             <nav className="navbar navbar-expand-lg bg-body-tertiary">
@@ -94,13 +97,13 @@ export default function Navbar(): React.JSX.Element {
                                 <a className="nav-link active" href="/menu">Menu</a>
                             </li>
                             {
-                                (role & Role.Chef) == Role.Chef &&
+                                isMounted && ((role & Role.Chef) == Role.Chef) &&
                                 <li>
                                     <a className="nav-link active" href="/chef">Chef</a>
                                 </li>
                             }
                             {
-                                (role & Role.Admin) == Role.Admin &&
+                                isMounted && ((role & Role.Admin) == Role.Admin) &&
                                 <li>
                                     <a className="nav-link active" href="/admin">Admin</a>
                                 </li>

@@ -6,7 +6,7 @@ import {PaymentsApi} from "@/lib/gen/apis";
 import {useRouter} from "next/navigation";
 import {ResponseError} from "@/lib/gen/runtime";
 import Config from "@/lib/config";
-import PaymentCard from "@/components/ui/paymentCard";
+import PaymentCard from "@/components/ui/PaymentCard";
 
 export default function PaymentsPage(): React.JSX.Element {
 
@@ -53,7 +53,7 @@ export default function PaymentsPage(): React.JSX.Element {
             ) : (
                 payments.length > 0 ? (
                     payments.map((payment) => (
-                        <PaymentCard key={payment.id} payment={payment} onClick={handlePaymentClick}/>
+                        <PaymentCard key={payment.id} payment={payment}/>
                     ))
                 ) : (
                     <div className="text-center h2">No payments found.</div>

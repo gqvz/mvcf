@@ -6,7 +6,7 @@ import Config from "@/lib/config";
 import {GetOrderItemResponse, GetOrderResponse} from "@/lib/gen/models";
 import {ResponseError} from "@/lib/gen/runtime";
 import {useRouter} from "next/navigation";
-import OrderItemCard from "@/components/ui/orderItemCard";
+import OrderItemCard from "@/components/ui/OrderItemCard";
 import Link from "next/link";
 
 export default function OrderPage({params}: { params: Usable<{ id: number }> }): React.JSX.Element {

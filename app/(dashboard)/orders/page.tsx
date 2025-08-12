@@ -3,7 +3,7 @@
 import React, {useEffect} from "react";
 import {useRouter} from "next/navigation";
 import {GetOrderResponse} from "@/lib/gen/models";
-import OrderCard from "@/components/ui/orderCard";
+import OrderCard from "@/components/ui/OrderCard";
 import {OrdersApi} from "@/lib/gen/apis";
 import Config from "@/lib/config";
 import {ResponseError} from "@/lib/gen/runtime";
