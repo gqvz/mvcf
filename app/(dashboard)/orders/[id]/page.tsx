@@ -11,10 +11,11 @@ import Link from "next/link";
 import {Button, Form, Modal} from "react-bootstrap";
 import ItemCard from "@/components/ui/ItemCard";
 
-export default function OrderPage({params}: { params: Usable<{ id: number }> }): React.JSX.Element {
+export default async function OrderPage({params}:{params: Promise<{id:string}>}): Promise<React.JSX.Element> {
     const router = useRouter();
 
-    const {id} = React.use<{ id: number }>(params);
+    const id = parseInt((await params).id);
+
     const [loading, setLoading] = React.useState<boolean>(true);
     const [order, setOrder] = React.useState<GetOrderResponse>({});
     const [items, setItems] = React.useState<Array<GetOrderItemResponse>>([]);
@@ -117,7 +118,7 @@ export default function OrderPage({params}: { params: Usable<{ id: number }> }):
         const orderItemsClient = new OrderItemsApi(Config);
         try {
             const resp = await orderItemsClient.createOrderItem({
-                id: order.id,
+                id: order?.id || 0,
                 request: {itemId: selectedItemId, customInstructions: customInstructions, quantity: itemCount}
             })
             alert("Item added successfully.");
@@ -180,6 +181,19 @@ export default function OrderPage({params}: { params: Usable<{ id: number }> }):
         setSelectedItemId(item.id || 0);
         setCustomInstructions("");
         setItemCount(1);
+    }
+
+    if (isNaN(id)){
+        return (
+            <main className="flex-fill mt-3 d-flex flex-column">
+                <div className="container d-flex flex-column align-items-center justify-content-center">
+                    <h1 className="text-center">Invalid Order ID</h1>
+                    <Link href="/orders">
+                        <button className="btn btn-primary">Back to Orders</button>
+                    </Link>
+                </div>
+            </main>
+        )
     }
 
     if (loading) {

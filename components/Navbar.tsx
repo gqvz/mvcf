@@ -91,7 +91,7 @@ export default function Navbar(): React.JSX.Element {
     const changeRoles = async () => {
         const client = new RequestsApi(Config);
         try {
-            await client.createRequest({request: {role: selectedRoles}});
+            await client.createRequest({request: {role: selectedRoles as Role}});
             setShowRoleChangeModal(false);
             alert("Role change request sent successfully.");
         } catch (error) {

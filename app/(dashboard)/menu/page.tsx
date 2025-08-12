@@ -114,7 +114,7 @@ export default function MenuPage(): React.JSX.Element {
                     </div>
                 ) : menuItems.length > 0 ? (
                     menuItems.map((item, index) => (
-                        <ItemCard item={item} key={index}/>))
+                        <ItemCard item={item} key={index} onClick={undefined}/>))
                 ) : (
                     <div className="text-center h2">No items found.</div>
                 )}
