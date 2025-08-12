@@ -4,7 +4,7 @@ import {ItemsApi} from "@/lib/gen/apis";
 import Config from "@/lib/config";
 import {ResponseError} from "@/lib/gen/runtime";
 
-export default function OrderItemCard({orderItem}: { orderItem: GetOrderItemResponse }): React.JSX.Element {
+export default function OrderItemCard({orderItem}: { orderItem: GetOrderItemResponse}): React.JSX.Element {
     const [loading, setLoading] = React.useState<boolean>(true);
     const [item, setItem] = React.useState<GetItemResponse>({});
 

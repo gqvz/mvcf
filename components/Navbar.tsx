@@ -2,10 +2,11 @@
 
 import React, {useEffect} from "react";
 import {useRouter} from "next/navigation";
-import {UsersApi} from "@/lib/gen/apis";
+import {RequestsApi, UsersApi} from "@/lib/gen/apis";
 import {Role} from "@/lib/gen/models";
 import {ResponseError} from "@/lib/gen/runtime";
 import Config from "@/lib/config";
+import {Button, Form, Modal} from "react-bootstrap";
 
 export default function Navbar(): React.JSX.Element {
     const router = useRouter();
@@ -13,6 +14,15 @@ export default function Navbar(): React.JSX.Element {
     const [username, setUsername] = React.useState<string>('Loading...');
     const [role, setRole] = React.useState<number>(0);
     const [isMounted, setIsMounted] = React.useState<boolean>(false);
+    const [showRoleChangeModal, setShowRoleChangeModal] = React.useState<boolean>(false);
+    const [selectedRoles, setSelectedRoles] = React.useState<number>(0);
+
+
+    const ROLE_VALUES = [
+        {label: "Customer", value: Role.Customer},
+        {label: "Chef", value: Role.Chef},
+        {label: "Admin", value: Role.Admin},
+    ];
 
     useEffect(() => {
         setIsMounted(true);
@@ -65,6 +75,12 @@ export default function Navbar(): React.JSX.Element {
         }
     }, [router]);
 
+    const handleCheckbox = (value: number) => {
+        setSelectedRoles((prev) =>
+            (prev & value) === value ? prev & ~value : prev | value
+        );
+    };
+
     const signOut = () => {
         localStorage.removeItem("userId");
         localStorage.removeItem("role");
@@ -73,6 +89,26 @@ export default function Navbar(): React.JSX.Element {
     };
 
     const changeRoles = async () => {
+        const client = new RequestsApi(Config);
+        try {
+            await client.createRequest({request: {role: selectedRoles}});
+            setShowRoleChangeModal(false);
+            alert("Role change request sent successfully.");
+        } catch (error) {
+            if (error instanceof ResponseError) {
+                const responseCode = error.response.status;
+                if (responseCode === 401 || responseCode === 403) {
+                    alert("Unauthorized access. Please log in again.");
+                    router.push("/login");
+                } else {
+                    console.error("Error requesting role change:", error);
+                    alert("An error occurred while requesting role change. Please try again later.");
+                }
+            } else {
+                console.error("Unexpected error:", error);
+                alert("An unexpected error occurred. Please try again later.");
+            }
+        }
     };
 
     return (
@@ -111,36 +147,42 @@ export default function Navbar(): React.JSX.Element {
                         </ul>
                         <div className="d-flex">
                             <span className="text-center align-content-center me-3">Hi, <code>{username}</code></span>
-                            <button className="btn btn-outline-secondary me-3" onClick={changeRoles}>Change roles
+                            <button className="btn btn-outline-secondary me-3" onClick={() => setShowRoleChangeModal(true)}>Change roles
                             </button>
                             <button className="btn btn-outline-danger" type="button" onClick={signOut}>Logout</button>
                         </div>
                     </div>
                 </div>
 
-                {/*<div className="modal" id="role-modal" tabIndex={-1}>*/}
-                {/*    <div className="modal-dialog">*/}
-                {/*        <div className="modal-content">*/}
-                {/*            <div className="modal-header">*/}
-                {/*                <h5 className="modal-title">Request Role change</h5>*/}
-                {/*                <button type="button" className="btn-close" data-bs-dismiss="modal"*/}
-                {/*                        aria-label="Close"></button>*/}
-                {/*            </div>*/}
-                {/*            <div className="modal-body">*/}
-                {/*                <select className="form-select mt-2" id="request-role" aria-label="Role select">*/}
-                {/*                    <option value="customer">Customer</option>*/}
-                {/*                    <option value="chef">Chef</option>*/}
-                {/*                    <option value="admin">Admin</option>*/}
-                {/*                </select>*/}
-                {/*            </div>*/}
-                {/*            <div className="modal-footer">*/}
-                {/*                <button type="button" className="btn btn-secondary" data-bs-dismiss="modal">Close*/}
-                {/*                </button>*/}
-                {/*                <button type="button" className="btn btn-primary">Request Role Change</button>*/}
-                {/*            </div>*/}
-                {/*        </div>*/}
-                {/*    </div>*/}
-                {/*</div>*/}
+                <Modal show={showRoleChangeModal} onHide={() => setShowRoleChangeModal(false)} centered>
+                    <Modal.Header closeButton>
+                        <Modal.Title>Request Role change</Modal.Title>
+                    </Modal.Header>
+                    <Modal.Body>
+                        <Form>
+                            {ROLE_VALUES.map((role) => (
+                                <Form.Check
+                                    key={role.value}
+                                    type="checkbox"
+                                    id={`role-checkbox-${role.value}`}
+                                    label={role.label}
+                                    checked={(selectedRoles & role.value) === role.value}
+                                    onChange={() => handleCheckbox(role.value)}
+                                    className="mb-2"
+                                />
+                            ))}
+                        </Form>
+                    </Modal.Body>
+                    <Modal.Footer>
+                        <Button variant="secondary" onClick={() => setShowRoleChangeModal(false)}>
+                            Close
+                        </Button>
+                        <Button variant="primary" onClick={changeRoles}>
+                            Request Role Change
+                        </Button>
+                    </Modal.Footer>
+                </Modal>
+
             </nav>
         </>
     );

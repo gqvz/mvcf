@@ -1,9 +1,9 @@
 import {GetItemResponse} from "@/lib/gen/models";
 import React from "react";
 
-export default function ItemCard({item}: { item: GetItemResponse }): React.JSX.Element {
+export default function ItemCard({item, onClick}: { item: GetItemResponse, onClick: ((item: GetItemResponse) => void) | undefined }): React.JSX.Element {
     return (
-        <div className="border p-4 me-3 mb-3 rounded-3 bg-body-tertiary shadow">
+        <div className="border p-4 me-3 mb-3 rounded-3 bg-body-tertiary shadow" role={onClick === undefined ? "none" : "button"} onClick={onClick ? () => onClick(item) : undefined}>
             <img src={item.imageUrl} className="img-fluid rounded-3 mb-3" style={{maxWidth: "300px"}}
                  alt={item.name}/>
             <h1 className="text-center mb-2"><code>{item.name}</code></h1>

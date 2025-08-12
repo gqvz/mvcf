@@ -34,7 +34,7 @@ export default function PendingItemCard({orderItem, onClick}: {orderItem: GetOrd
             <h4 className="text-center me-3">{`${orderItem.quantity} x ${item.name}`}</h4>
             <h4 className="text-center me-3 flex-fill">{orderItem.customInstructions}</h4>
             <div className="h-100 align-content-center">
-                <button type="button" className="btn btn-success" onClick={() => onClick(item)}>Mark as
+                <button type="button" className="btn btn-success" onClick={() => onClick(orderItem)}>Mark as
                     completed
                 </button>
             </div>
