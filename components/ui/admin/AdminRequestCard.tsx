@@ -1,5 +1,6 @@
 import {GetRequestResponse, RequestStatus} from "@/lib/gen/models";
 import React from "react";
+import {Button} from "react-bootstrap";
 
 export default function AdminRequestCard({request, onAction}: {
     request: GetRequestResponse,
@@ -14,8 +15,8 @@ export default function AdminRequestCard({request, onAction}: {
             <td className="text-end">
                 {request.status === RequestStatus.Pending ?
                     (<>
-                        <button className="btn btn-success me-2" onClick={() => onAction(request, "granted")}>Grant</button>
-                        <button className="btn btn-danger" onClick={() => onAction(request, "rejected")}>Reject</button>
+                        <Button variant="success" className="me-2" onClick={() => onAction(request, "granted")}>Grant</Button>
+                        <Button variant="danger" onClick={() => onAction(request, "rejected")}>Reject</Button>
                     </>)
                     : <></>
                 }

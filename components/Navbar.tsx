@@ -4,11 +4,10 @@ import React, {useEffect} from "react";
 import {useRouter} from "next/navigation";
 import {RequestsApi, UsersApi} from "@/lib/gen/apis";
 import {Role} from "@/lib/gen/models";
-import {ResponseError} from "@/lib/gen/runtime";
 import Config from "@/lib/config";
-import {Button, Form, Modal} from "react-bootstrap";
+import {Button, Form, Modal, Navbar, Container, Nav, } from "react-bootstrap";
 
-export default function Navbar(): React.JSX.Element {
+export default function NavbarComponent(): React.JSX.Element {
     const router = useRouter();
 
     const [username, setUsername] = React.useState<string>('Loading...');
@@ -44,28 +43,8 @@ export default function Navbar(): React.JSX.Element {
 
         const fetchData = async (id: number) => {
             const client = new UsersApi(Config);
-            try {
-                const response = await client.getUserById({id: id});
-                if (response.name === undefined || response.name === null) {
-                    router.push("/login");
-                    return;
-                }
-                setUsername(response.name);
-            } catch (error) {
-                if (error instanceof ResponseError) {
-                    const responseCode = error.response.status;
-                    if (responseCode === 401 || responseCode === 403) {
-                        alert("Unauthorized access. Please log in again.");
-                        router.push("/login");
-                    } else {
-                        console.error("Error fetching user data:", error);
-                        alert("An error occurred while fetching user data. Please try again later.");
-                    }
-                } else {
-                    console.error("Unexpected error:", error);
-                    alert("An unexpected error occurred. Please try again later.");
-                }
-            }
+            const response = await client.getUserById({id: id});
+            setUsername(response.name || "");
         };
 
         if (!name) {
@@ -90,69 +69,36 @@ export default function Navbar(): React.JSX.Element {
 
     const changeRoles = async () => {
         const client = new RequestsApi(Config);
-        try {
-            await client.createRequest({request: {role: selectedRoles as Role}});
-            setShowRoleChangeModal(false);
-            alert("Role change request sent successfully.");
-        } catch (error) {
-            if (error instanceof ResponseError) {
-                const responseCode = error.response.status;
-                if (responseCode === 401 || responseCode === 403) {
-                    alert("Unauthorized access. Please log in again.");
-                    router.push("/login");
-                } else {
-                    console.error("Error requesting role change:", error);
-                    alert("An error occurred while requesting role change. Please try again later.");
-                }
-            } else {
-                console.error("Unexpected error:", error);
-                alert("An unexpected error occurred. Please try again later.");
-            }
-        }
+        await client.createRequest({request: {role: selectedRoles as Role}});
+        setShowRoleChangeModal(false);
+        alert("Request sent");
     };
 
     return (
         <>
-            <nav className="navbar navbar-expand-lg bg-body-tertiary">
-                <div className="container-fluid">
-                    <a className="navbar-brand" href="/">MVC</a>
-                    <button className="navbar-toggler" type="button" data-bs-toggle="collapse"
-                            data-bs-target="#navbarSupportedContent"
-                            aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
-                        <span className="navbar-toggler-icon"></span>
-                    </button>
-                    <div className="collapse navbar-collapse" id="navbarSupportedContent">
-                        <ul className="navbar-nav me-auto mb-2 mb-lg-0">
-                            <li className="nav-item">
-                                <a className="nav-link active" aria-current="page" href="/orders">Orders</a>
-                            </li>
-                            <li className="nav-item">
-                                <a className="nav-link active" href="/payments">Payments</a>
-                            </li>
-                            <li>
-                                <a className="nav-link active" href="/menu">Menu</a>
-                            </li>
-                            {
-                                isMounted && ((role & Role.Chef) == Role.Chef) &&
-                                <li>
-                                    <a className="nav-link active" href="/chef">Chef</a>
-                                </li>
+            <Navbar bg="light" expand="lg" className="bg-body-tertiary">
+                <Container fluid>
+                    <Navbar.Brand href="/">MVC</Navbar.Brand>
+                    <Navbar.Toggle aria-controls="navbarSupportedContent" />
+                    <Navbar.Collapse id="navbarSupportedContent">
+                        <Nav className="me-auto mb-2 mb-lg-0">
+                            <Nav.Link href="/orders" active>Orders</Nav.Link>
+                            <Nav.Link href="/payments" active>Payments</Nav.Link>
+                            <Nav.Link href="/menu" active>Menu</Nav.Link>
+                            {isMounted && ((role & Role.Chef) == Role.Chef) &&
+                                <Nav.Link href="/chef" active>Chef</Nav.Link>
                             }
-                            {
-                                isMounted && ((role & Role.Admin) == Role.Admin) &&
-                                <li>
-                                    <a className="nav-link active" href="/admin">Admin</a>
-                                </li>
+                            {isMounted && ((role & Role.Admin) == Role.Admin) &&
+                                <Nav.Link href="/admin" active>Admin</Nav.Link>
                             }
-                        </ul>
+                        </Nav>
                         <div className="d-flex">
                             <span className="text-center align-content-center me-3">Hi, <code>{username}</code></span>
-                            <button className="btn btn-outline-secondary me-3" onClick={() => setShowRoleChangeModal(true)}>Change roles
-                            </button>
-                            <button className="btn btn-outline-danger" type="button" onClick={signOut}>Logout</button>
+                            <Button variant="outline-secondary" className="me-3" onClick={() => setShowRoleChangeModal(true)}>Change roles</Button>
+                            <Button variant="outline-danger" onClick={signOut}>Logout</Button>
                         </div>
-                    </div>
-                </div>
+                    </Navbar.Collapse>
+                </Container>
 
                 <Modal show={showRoleChangeModal} onHide={() => setShowRoleChangeModal(false)} centered>
                     <Modal.Header closeButton>
@@ -183,7 +129,7 @@ export default function Navbar(): React.JSX.Element {
                     </Modal.Footer>
                 </Modal>
 
-            </nav>
+            </Navbar>
         </>
     );
 }

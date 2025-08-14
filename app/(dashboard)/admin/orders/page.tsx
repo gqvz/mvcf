@@ -6,6 +6,7 @@ import {OrdersApi} from "@/lib/gen/apis";
 import Config from "@/lib/config";
 import AdminOrderCard from "@/components/ui/admin/AdminOrderCard";
 import {useRouter} from "next/navigation";
+import {Container, Form, Button, Table} from "react-bootstrap";
 
 export default function OrdersPage(): React.JSX.Element {
     const [selectValue, setSelectValue] = React.useState("");
@@ -20,14 +21,9 @@ export default function OrdersPage(): React.JSX.Element {
     const fetchOrders = async () => {
         setLoading(true);
         const client = new OrdersApi(Config);
-        try {
-            const data = await client.getOrders({status: selectValue});
-            setOrders(data);
-            setLoading(false);
-        } catch (error) {
-            console.error("Error fetching orders:", error);
-            alert("An error occurred while fetching orders. Please try again later.");
-        }
+        const data = await client.getOrders({status: selectValue});
+        setOrders(data);
+        setLoading(false);
     }
 
     useEffect(() => {
@@ -36,19 +32,24 @@ export default function OrdersPage(): React.JSX.Element {
 
     return (
         <div className="flex-fill tabs">
-            <div className="container d-flex">
-                <select className="form-select me-3 w-100" id="order-status-select" aria-label="Status select"
-                        value={selectValue} onChange={(e) => setSelectValue(e.target.value)}>
+            <Container className="d-flex">
+                <Form.Select 
+                    className="me-3 w-100" 
+                    id="order-status-select" 
+                    aria-label="Status select"
+                    value={selectValue} 
+                    onChange={(e) => setSelectValue(e.target.value)}
+                >
                     <option value="">All</option>
                     <option value="closed">Closed</option>
                     <option value="open">Open</option>
-                </select>
-                <button className="btn btn-outline-primary" onClick={fetchOrders}>Refresh</button>
-            </div>
+                </Form.Select>
+                <Button variant="outline-primary" onClick={fetchOrders}>Refresh</Button>
+            </Container>
 
-            <div className="container d-flex flex-column">
+            <Container className="d-flex flex-column">
                 <div className="table-responsive mt-3">
-                    <table className="table table-striped mw-100 table-hover" id="orders-list">
+                    <Table striped hover className="mw-100" id="orders-list">
                         <thead>
                         <tr>
                             <th scope="col">ID</th>
@@ -72,9 +73,9 @@ export default function OrdersPage(): React.JSX.Element {
                             </tr>
                         )}
                         </tbody>
-                    </table>
+                    </Table>
                 </div>
-            </div>
+            </Container>
         </div>
     );
 }

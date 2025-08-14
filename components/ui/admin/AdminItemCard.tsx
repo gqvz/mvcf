@@ -1,5 +1,6 @@
 import {GetItemResponse} from "@/lib/gen/models";
 import React from "react";
+import {Button} from "react-bootstrap";
 
 export function AdminItemCard({item, onClick}: {
     item: GetItemResponse,
@@ -17,7 +18,7 @@ export function AdminItemCard({item, onClick}: {
             <td className="text-center">{item.tags?.map(t => t.name).join(', ')}</td>
             <td className="text-center">{item.price}</td>
             <td className="text-end">
-                <button className="btn btn-sm btn-secondary" onClick={() => onClick(item)}>Edit Item</button>
+                <Button size="sm" variant="secondary" onClick={() => onClick(item)}>Edit Item</Button>
             </td>
         </tr>
     );

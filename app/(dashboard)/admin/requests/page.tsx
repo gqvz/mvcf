@@ -5,6 +5,7 @@ import {GetRequestResponse, RequestStatus} from "@/lib/gen/models";
 import {RequestsApi} from "@/lib/gen/apis";
 import Config from "@/lib/config";
 import AdminRequestCard from "@/components/ui/admin/AdminRequestCard";
+import {Container, Form, Button, Table} from "react-bootstrap";
 
 export default function RequestsPage(): React.JSX.Element {
     const [status, setStatus] = React.useState<string>("");
@@ -19,49 +20,42 @@ export default function RequestsPage(): React.JSX.Element {
         setLoading(true);
         const client = new RequestsApi(Config);
 
-        try {
-            const requests = await client.getRequests({status: status});
-            setRequests(requests);
-            setLoading(false);
-        } catch (error) {
-            console.error("Error fetching requests:", error);
-            alert("An error occurred while fetching requests. Please try again later.");
-        }
+        const requests = await client.getRequests({status: status});
+        setRequests(requests);
+        setLoading(false);
     };
 
     const handleAction = async (request: GetRequestResponse, action: "granted" | "rejected") => {
         const client = new RequestsApi(Config);
-        try {
-            if (action === "granted") {
-                await client.grantRequest({id: request.id || 0});
-                alert("Request granted successfully.");
-            } else if (action === "rejected") {
-                await client.rejectRequest({id: request.id || 0});
-                alert("Request rejected successfully.");
-            }
-            await fetchRequests();
-        } catch (error) {
-            console.error("Error handling request action:", error);
-            alert("An error occurred while processing the request. Please try again later.");
+        if (action === "granted") {
+            await client.grantRequest({id: request.id || 0});
+        } else if (action === "rejected") {
+            await client.rejectRequest({id: request.id || 0});
         }
+        await fetchRequests();
     }
 
     return (
         <div className="flex-fill tabs">
             <div>
-                <div className="container d-flex">
-                    <select className="form-select me-3 flex-fill" id="request-status-select" aria-label="Status select"
-                            value={status} onChange={e => setStatus(e.target.value)}>
+                <Container className="d-flex">
+                    <Form.Select 
+                        className="me-3 flex-fill" 
+                        id="request-status-select" 
+                        aria-label="Status select"
+                        value={status} 
+                        onChange={e => setStatus(e.target.value)}
+                    >
                         <option value="">All</option>
                         <option value={RequestStatus.Pending}>Pending</option>
                         <option value={RequestStatus.Rejected}>Rejected</option>
                         <option value={RequestStatus.Granted}>Granted</option>
-                    </select>
-                    <button className="btn btn-outline-primary" onClick={fetchRequests}>Search</button>
-                </div>
-                <div className="container d-flex flex-column">
+                    </Form.Select>
+                    <Button variant="outline-primary" onClick={fetchRequests}>Search</Button>
+                </Container>
+                <Container className="d-flex flex-column">
                     <div className="table-responsive mt-3">
-                        <table className="table table-striped mw-100 table-hover" id="request-list">
+                        <Table striped hover className="mw-100" id="request-list">
                             <thead>
                             <tr>
                                 <th scope="col">ID</th>
@@ -91,9 +85,9 @@ export default function RequestsPage(): React.JSX.Element {
                             )}
                             <tbody>
                             </tbody>
-                        </table>
+                        </Table>
                     </div>
-                </div>
+                </Container>
             </div>
         </div>
     );

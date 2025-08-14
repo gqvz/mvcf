@@ -1,5 +1,6 @@
 import {GetOrderResponse} from "@/lib/gen/models";
 import React from "react";
+import {Button} from "react-bootstrap";
 
 export default function AdminOrderCard({order, onClick}: {
     order: GetOrderResponse,
@@ -13,7 +14,7 @@ export default function AdminOrderCard({order, onClick}: {
             <td className="text-center">{order.status}</td>
             <td className="text-center">{order.orderedAt}</td>
             <td className="text-end">
-                <button className="btn btn-sm btn-secondary" onClick={() => onClick(order)}>Open</button>
+                <Button size="sm" variant="secondary" onClick={() => onClick(order)}>Open</Button>
             </td>
         </tr>
     );

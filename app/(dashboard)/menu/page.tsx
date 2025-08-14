@@ -5,9 +5,9 @@ import {GetItemResponse, Tag} from "@/lib/gen/models";
 import ItemCard from "@/components/ui/ItemCard";
 import Config from "@/lib/config";
 import {ItemsApi, TagsApi} from "@/lib/gen/apis";
-import {ResponseError} from "@/lib/gen/runtime";
 import {useRouter} from "next/navigation";
-1
+import {Container, Form, Button} from "react-bootstrap";
+
 export default function MenuPage(): React.JSX.Element {
     const router = useRouter();
 
@@ -22,30 +22,15 @@ export default function MenuPage(): React.JSX.Element {
         (async () => {
             const tagsClient = new TagsApi(Config);
             const itemsClient = new ItemsApi(Config);
-            try {
-                const fetchTagsPromise = tagsClient.getTags();
-                const fetchItemsPromise = itemsClient.getItems();
-                const [tags, items] = await Promise.all([fetchTagsPromise, fetchItemsPromise])
-                setTags(tags);
-                setMenuItems(items);
-                setTagsLoading(false);
-                setLoading(false);
-            } catch (error) {
-                if (error instanceof ResponseError) {
-                    const responseCode = error.response.status;
-                    if (responseCode === 401) {
-                        alert("Unauthorized access. Please log in again.");
-                        router.push("/login");
-                    } else {
-                        console.error("Error fetching data:", error);
-                        alert("An error occurred while fetching data. Please try again later.");
-                    }
-                } else {
-                    console.error("Unexpected error:", error);
-                    alert("An unexpected error occurred. Please try again later.");
-                }
-            }
+            const fetchTagsPromise = tagsClient.getTags();
+            const fetchItemsPromise = itemsClient.getItems();
+            const [tags, items] = await Promise.all([fetchTagsPromise, fetchItemsPromise])
+            setTags(tags);
+            setMenuItems(items);
+            setTagsLoading(false);
+            setLoading(false);
         })()
+
     }, [router])
 
     const handleSearch = async (event: React.FormEvent<HTMLFormElement> |  React.MouseEvent<HTMLButtonElement>) => {
@@ -53,72 +38,63 @@ export default function MenuPage(): React.JSX.Element {
         setLoading(true);
         const query = searchQuery.trim().toLowerCase();
         const itemsClient = new ItemsApi(Config);
-        try {
-            const items = await itemsClient.getItems({
-                search: query,
-                tags: selectedTags.map(t => tags[t].name).join(",")
-            });
-            setMenuItems(items);
-            setLoading(false);
-        } catch (error) {
-            if (error instanceof ResponseError) {
-                const responseCode = error.response.status;
-                if (responseCode === 401) {
-                    alert("Unauthorized access. Please log in again.");
-                    router.push("/login");
-                } else {
-                    console.error("Error fetching items:", error);
-                    alert("An error occurred while fetching items. Please try again later.");
-                }
-            }
-            setLoading(false);
-        }
+        const items = await itemsClient.getItems({
+            search: query,
+            tags: selectedTags.map(t => tags[t].name).join(",")
+        });
+        setMenuItems(items);
+        setLoading(false);
     }
 
     return (
         <>
-            <div className="container d-flex mb-3 mt-3">
-                <form onSubmit={handleSearch} className="w-100 d-flex align-items-center">
-                    <div className="form-floating flex-fill w-100 d-flex">
-
-                        <input type="text" value={searchQuery} onChange={e => setSearchQuery(e.target.value)}
-                               id="item-search" className="flex-fill form-control me-3"
-                               placeholder="Search Items"/>
-                        <label htmlFor="item-search">Search Items</label>
-                        <button className="btn btn-outline-primary">Search</button>
-                    </div>
-                </form>
-            </div>
-            <div className="container d-flex w-100 flex-wrap" id="tagButtons">
+            <Container className="d-flex mb-3 mt-3">
+                <Form onSubmit={handleSearch} className="w-100 d-flex align-items-center">
+                    <Form.Floating className="flex-fill w-100 d-flex">
+                        <Form.Control 
+                            type="text" 
+                            value={searchQuery} 
+                            onChange={e => setSearchQuery(e.target.value)}
+                            id="item-search" 
+                            className="flex-fill me-3"
+                            placeholder="Search Items"
+                        />
+                        <Form.Label htmlFor="item-search">Search Items</Form.Label>
+                        <Button variant="outline-primary" type="submit">Search</Button>
+                    </Form.Floating>
+                </Form>
+            </Container>
+            <Container className="d-flex w-100 flex-wrap" id="tagButtons">
                 {tagsLoading ? (
                     <div className="text-center h4">Loading tags...</div>
                 ) : (
                     tags.map((tag, index) => (
-                        <button key={index}
-                                className={`btn btn-secondary me-2 mb-2 ${selectedTags.includes(index) ? 'active' : ''}`}
-                                onClick={async (e) => {
-                                    setSelectedTags(prev => prev.includes(index) ? prev.filter(t => t !== index) : [...prev, index]);
-                                    await handleSearch(e)
-                                }}>
+                        <Button 
+                            key={index}
+                            variant="secondary" 
+                            className={`me-2 mb-2 ${selectedTags.includes(index) ? 'active' : ''}`}
+                            onClick={async (e) => {
+                                setSelectedTags(prev => prev.includes(index) ? prev.filter(t => t !== index) : [...prev, index]);
+                                await handleSearch(e)
+                            }}
+                        >
                             {tag.name}
-                        </button>
+                        </Button>
                     ))
                 )}
-            </div>
-            <div id="menu"
-                 className="container mt-3 d-flex flex-fill flex-wrap align-content-center justify-content-center">
+            </Container>
+            <Container id="menu" className="mt-3 d-flex flex-fill flex-wrap align-content-center justify-content-center">
                 {loading ? (
-                    <div
-                        className="container mt-3 d-flex flex-fill flex-wrap align-content-center justify-content-center">
+                    <Container className="mt-3 d-flex flex-fill flex-wrap align-content-center justify-content-center">
                         <div className="text-center h2">Loading...</div>
-                    </div>
+                    </Container>
                 ) : menuItems.length > 0 ? (
                     menuItems.map((item, index) => (
                         <ItemCard item={item} key={index} onClick={undefined}/>))
                 ) : (
                     <div className="text-center h2">No items found.</div>
                 )}
-            </div>
+            </Container>
         </>
     )
 }

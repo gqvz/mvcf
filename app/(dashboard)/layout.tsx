@@ -1,7 +1,7 @@
 'use client';
 
 import React, {useEffect} from "react";
-import Navbar from "@/components/Navbar";
+import NavbarComponent from "@/components/Navbar";
 import {Button, Modal, ListGroup} from "react-bootstrap";
 import {GetRequestResponse, RequestStatus, UserSeenStatus} from "@/lib/gen/models";
 import {RequestsApi} from "@/lib/gen/apis";
@@ -16,16 +16,11 @@ export default function RootLayout({children}: Readonly<{
     useEffect(() => {
         const fetchNotifications = async () => {
             const client = new RequestsApi(Config);
-            try {
-                const response = await client.getRequests({user: parseInt(localStorage.getItem("userId") || "") || 0})
-                const unseenNotifications = response.filter(n => n.userStatus === UserSeenStatus.Unseen && n.status !== RequestStatus.Pending);
-                setNotifications(unseenNotifications);
-                if (unseenNotifications.length > 0) {
-                    setShowNotificationModal(true);
-                }
-            } catch (error) {
-                console.error("Error fetching notifications:", error);
-                alert("An error occurred while fetching notifications. Please try again later.");
+            const response = await client.getRequests({user: parseInt(localStorage.getItem("userId") || "") || 0})
+            const unseenNotifications = response.filter(n => n.userStatus === UserSeenStatus.Unseen && n.status !== RequestStatus.Pending);
+            setNotifications(unseenNotifications);
+            if (unseenNotifications.length > 0) {
+                setShowNotificationModal(true);
             }
         }
         fetchNotifications();
@@ -33,18 +28,13 @@ export default function RootLayout({children}: Readonly<{
 
     const onMarkAsRead = async (id: number) => {
         const client = new RequestsApi(Config);
-        try {
-            await client.markRequestSeen({id: id});
-            setNotifications((prev) => prev.map(n => n.id === id ? {...n, userStatus: UserSeenStatus.Seen} : n));
-        } catch (error) {
-            console.error("Error marking notification as read:", error);
-            alert("An error occurred while marking the notification as read. Please try again later.");
-        }
+        await client.markRequestSeen({id: id});
+        setNotifications((prev) => prev.map(n => n.id === id ? {...n, userStatus: UserSeenStatus.Seen} : n));
     }
 
     return (
         <>
-            <Navbar/>
+            <NavbarComponent/>
             {children}
 
             <Modal show={showNotificationModal} onHide={() => setShowNotificationModal(false)} centered>

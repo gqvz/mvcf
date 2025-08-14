@@ -1,5 +1,6 @@
 import {GetPaymentResponse, PaymentStatus} from "@/lib/gen/models";
 import React from "react";
+import {Button} from "react-bootstrap";
 
 export default function AdminPaymentCard({payment, onStatusChange}: {
     payment: GetPaymentResponse,
@@ -12,8 +13,9 @@ export default function AdminPaymentCard({payment, onStatusChange}: {
             <td className="text-center">${payment.total}</td>
             <td className="text-center">{payment.status}</td>
             <td className="text-end">
-                <button className="btn btn-sm btn-secondary" onClick={async () => onStatusChange(payment)}>{payment.status == PaymentStatus.Accepted ? "Mark as Processing" : "Mark as Accepted"}
-                </button>
+                <Button size="sm" variant="secondary" onClick={async () => onStatusChange(payment)}>
+                    {payment.status == PaymentStatus.Accepted ? "Mark as Processing" : "Mark as Accepted"}
+                </Button>
             </td>
         </tr>
     )
