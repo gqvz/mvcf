@@ -1,0 +1,9 @@
+build/
+node_modules/
+internals/generators/
+internals/scripts/
+lib/gen/
+package-lock.json
+yarn.lock
+package.json
+react-template.svg
