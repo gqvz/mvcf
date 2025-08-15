@@ -14,9 +14,9 @@ export default function ItemCard({
       className="me-3 mb-3 shadow"
       role={onClick === undefined ? 'none' : 'button'}
       onClick={onClick ? () => onClick(item) : undefined}
-      style={{ cursor: onClick ? 'pointer' : 'default' }}
+      style={{ cursor: onClick ? 'pointer' : 'default', width: '300px' }}
     >
-      <Card.Img variant="top" src={item.imageUrl} style={{ maxWidth: '300px' }} alt={item.name} />
+      <Card.Img variant="top" src={item.imageUrl} style={{ maxWidth: '300px', height: '200px' }} alt={item.name} />
       <Card.Body>
         <Card.Title className="text-center mb-2">
           <code>{item.name}</code>

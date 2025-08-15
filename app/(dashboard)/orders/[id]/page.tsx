@@ -7,19 +7,16 @@ import { GetItemResponse, GetOrderItemResponse, GetOrderResponse, GetTagResponse
 import { useParams, useRouter } from 'next/navigation';
 import OrderItemCard from '@/components/ui/OrderItemCard';
 import Link from 'next/link';
-import { Button, Container, Form } from 'react-bootstrap';
+import { Button, Container } from 'react-bootstrap';
 import SearchModal from '@/components/modals/SearchModal';
 import TipModal from '@/components/modals/TipModal';
-import OrderItemModal from '@/components/modals/OrderItemModal';
 import { useSearchModalStore } from '@/lib/stores/searchModalStore';
 import { useTipModalStore } from '@/lib/stores/tipModalStore';
-import { useOrderItemModalStore } from '@/lib/stores/orderItemModalStore';
 
 export default function OrderPage(): React.JSX.Element {
   const router = useRouter();
   const { open: openSearchModal, updateSearchList, setSearchLoading } = useSearchModalStore();
   const { open: openTipModal } = useTipModalStore();
-  const { open: openOrderItemModal } = useOrderItemModalStore();
 
   const id = parseInt((useParams().id as string) || 'NaN');
 
@@ -71,18 +68,6 @@ export default function OrderPage(): React.JSX.Element {
     });
   };
 
-  const addItemHandler = async () => {
-    const orderItemsClient = new OrderItemsApi(Config);
-    const { selectedItemId, customInstructions, itemCount } = useOrderItemModalStore.getState();
-    const resp = await orderItemsClient.createOrderItem({
-      id: order?.id || 0,
-      request: { itemId: selectedItemId, customInstructions: customInstructions, quantity: itemCount }
-    });
-    alert('Item added');
-    const orderItems = await orderItemsClient.getOrderItems({ id: order.id || 0 });
-    setItems(orderItems);
-  };
-
   const searchItems = async () => {
     setSearchLoading(true);
     const itemsClient = new ItemsApi(Config);
@@ -95,8 +80,24 @@ export default function OrderPage(): React.JSX.Element {
     setSearchLoading(false);
   };
 
-  const handleOrderItem = (item: GetItemResponse) => {
-    openOrderItemModal(item.id || 0, addItemHandler);
+  const handleConfirmCart = async (cartItems: Array<{ itemId: number; count: number; customInstructions: string }>) => {
+    const orderItemsClient = new OrderItemsApi(Config);
+
+    for (const cartItem of cartItems) {
+      await orderItemsClient.createOrderItem({
+        id: order?.id || 0,
+        request: {
+          itemId: cartItem.itemId,
+          customInstructions: cartItem.customInstructions,
+          quantity: cartItem.count
+        }
+      });
+    }
+
+    alert(`${cartItems.length} items added to order`);
+
+    const orderItems = await orderItemsClient.getOrderItems({ id: order.id || 0 });
+    setItems(orderItems);
   };
 
   if (isNaN(id)) {
@@ -149,7 +150,7 @@ export default function OrderPage(): React.JSX.Element {
               <Button
                 variant="primary"
                 className="me-2"
-                onClick={() => openSearchModal(tags, searchItems, handleOrderItem)}
+                onClick={() => openSearchModal(tags, searchItems, handleConfirmCart)}
               >
                 Add Item
               </Button>
@@ -183,7 +184,6 @@ export default function OrderPage(): React.JSX.Element {
 
       <SearchModal />
       <TipModal />
-      <OrderItemModal />
     </main>
   );
 }

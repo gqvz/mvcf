@@ -2,7 +2,7 @@
 
 import React from 'react';
 import { GetTagResponse } from '@/lib/gen/models';
-import { Button, Container, Form, Table } from 'react-bootstrap';
+import { Button, Container, Table } from 'react-bootstrap';
 import Config from '@/lib/config';
 import { TagsApi } from '@/lib/gen/apis';
 import AdminTagCard from '@/components/ui/admin/AdminTagCard';

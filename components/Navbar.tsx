@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import { RequestsApi, UsersApi } from '@/lib/gen/apis';
 import { Role } from '@/lib/gen/models';
 import Config from '@/lib/config';
-import { Button, Container, Form, Nav, Navbar } from 'react-bootstrap';
+import { Button, Container, Nav, Navbar } from 'react-bootstrap';
 import RoleChangeModal from '@/components/modals/RoleChangeModal';
 
 export default function NavbarComponent(): React.JSX.Element {
