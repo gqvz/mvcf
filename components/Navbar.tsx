@@ -5,7 +5,8 @@ import { useRouter } from 'next/navigation';
 import { RequestsApi, UsersApi } from '@/lib/gen/apis';
 import { Role } from '@/lib/gen/models';
 import Config from '@/lib/config';
-import { Button, Container, Form, Modal, Nav, Navbar } from 'react-bootstrap';
+import { Button, Container, Form, Nav, Navbar } from 'react-bootstrap';
+import RoleChangeModal from '@/components/modals/RoleChangeModal';
 
 export default function NavbarComponent(): React.JSX.Element {
   const router = useRouter();
@@ -15,12 +16,6 @@ export default function NavbarComponent(): React.JSX.Element {
   const [isMounted, setIsMounted] = React.useState<boolean>(false);
   const [showRoleChangeModal, setShowRoleChangeModal] = React.useState<boolean>(false);
   const [selectedRoles, setSelectedRoles] = React.useState<number>(0);
-
-  const ROLE_VALUES = [
-    { label: 'Customer', value: Role.Customer },
-    { label: 'Chef', value: Role.Chef },
-    { label: 'Admin', value: Role.Admin }
-  ];
 
   useEffect(() => {
     setIsMounted(true);
@@ -113,34 +108,13 @@ export default function NavbarComponent(): React.JSX.Element {
           </Navbar.Collapse>
         </Container>
 
-        <Modal show={showRoleChangeModal} onHide={() => setShowRoleChangeModal(false)} centered>
-          <Modal.Header closeButton>
-            <Modal.Title>Request Role change</Modal.Title>
-          </Modal.Header>
-          <Modal.Body>
-            <Form>
-              {ROLE_VALUES.map((role) => (
-                <Form.Check
-                  key={role.value}
-                  type="checkbox"
-                  id={`role-checkbox-${role.value}`}
-                  label={role.label}
-                  checked={(selectedRoles & role.value) === role.value}
-                  onChange={() => handleCheckbox(role.value)}
-                  className="mb-2"
-                />
-              ))}
-            </Form>
-          </Modal.Body>
-          <Modal.Footer>
-            <Button variant="secondary" onClick={() => setShowRoleChangeModal(false)}>
-              Close
-            </Button>
-            <Button variant="primary" onClick={changeRoles}>
-              Request Role Change
-            </Button>
-          </Modal.Footer>
-        </Modal>
+        <RoleChangeModal
+          show={showRoleChangeModal}
+          onHide={() => setShowRoleChangeModal(false)}
+          selectedRoles={selectedRoles}
+          onRoleToggle={handleCheckbox}
+          onRequestRoleChange={changeRoles}
+        />
       </Navbar>
     </>
   );

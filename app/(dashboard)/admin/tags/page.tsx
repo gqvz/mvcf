@@ -2,24 +2,25 @@
 
 import React from 'react';
 import { GetTagResponse } from '@/lib/gen/models';
-import { Button, Container, Form, Modal, Table } from 'react-bootstrap';
+import { Button, Container, Form, Table } from 'react-bootstrap';
 import Config from '@/lib/config';
 import { TagsApi } from '@/lib/gen/apis';
 import AdminTagCard from '@/components/ui/admin/AdminTagCard';
+import TagModal from '@/components/modals/TagModal';
+import { useTagModalStore } from '@/lib/stores/tagModalStore';
 
 export default function TagsPage(): React.JSX.Element {
+  const { openCreate, openEdit } = useTagModalStore();
   const [tags, setTags] = React.useState<Array<GetTagResponse>>([]);
   const [loading, setLoading] = React.useState<boolean>(true);
-  const [showCreateTagModal, setShowCreateTagModal] = React.useState<boolean>(false);
-  const [showEditTagModal, setShowEditTagModal] = React.useState<boolean>(false);
   const [tagName, setTagName] = React.useState<string>('');
   const [editTagId, setEditTagId] = React.useState<number>(0);
 
   const createTag = async () => {
     const tagsApi = new TagsApi(Config);
+    const { tagName } = useTagModalStore.getState();
     await tagsApi.createTag({ tag: { name: tagName } });
     setTagName('');
-    setShowCreateTagModal(false);
   };
 
   const fetchTags = async () => {
@@ -30,12 +31,12 @@ export default function TagsPage(): React.JSX.Element {
     setLoading(false);
   };
 
-  const editTag = async () => {
+  const editTag = async (id: number) => {
     const tagsApi = new TagsApi(Config);
-    await tagsApi.editTag({ id: editTagId, tag: { name: tagName } });
+    const { tagName } = useTagModalStore.getState();
+    await tagsApi.editTag({ id: id, tag: { name: tagName } });
     setTagName('');
     setEditTagId(0);
-    setShowEditTagModal(false);
     fetchTags();
   };
 
@@ -46,7 +47,7 @@ export default function TagsPage(): React.JSX.Element {
   return (
     <div className="flex-fill tabs">
       <Container className="d-flex flex-column">
-        <Button variant="success" onClick={() => setShowCreateTagModal(true)}>
+        <Button variant="success" onClick={() => openCreate(createTag)}>
           Create Tag
         </Button>
         <div className="table-responsive mt-3">
@@ -76,7 +77,7 @@ export default function TagsPage(): React.JSX.Element {
                     onClick={() => {
                       setTagName(tag.name || '');
                       setEditTagId(tag.id || 0);
-                      setShowEditTagModal(true);
+                      openEdit(tag.name || '', async () => await editTag(tag?.id || 0));
                     }}
                     tag={tag}
                   />
@@ -92,56 +93,7 @@ export default function TagsPage(): React.JSX.Element {
           </Table>
         </div>
       </Container>
-      <Modal show={showCreateTagModal} onHide={() => setShowCreateTagModal(false)}>
-        <Modal.Header closeButton>
-          <Modal.Title>Create Tag</Modal.Title>
-        </Modal.Header>
-        <Modal.Body>
-          <Form.Floating>
-            <Form.Control
-              type="text"
-              value={tagName}
-              onChange={(e) => setTagName(e.target.value)}
-              id="tag-name"
-              placeholder="Tag Name"
-            />
-            <Form.Label htmlFor="tag-name">Tag Name</Form.Label>
-          </Form.Floating>
-        </Modal.Body>
-        <Modal.Footer>
-          <Button variant="secondary" onClick={() => setShowCreateTagModal(false)}>
-            Close
-          </Button>
-          <Button variant="primary" onClick={createTag} disabled={tagName.trim() === ''}>
-            Save Changes
-          </Button>
-        </Modal.Footer>
-      </Modal>
-      <Modal show={showEditTagModal} onHide={() => setShowEditTagModal(false)}>
-        <Modal.Header closeButton>
-          <Modal.Title>Edit Tag</Modal.Title>
-        </Modal.Header>
-        <Modal.Body>
-          <Form.Floating>
-            <Form.Control
-              type="text"
-              value={tagName}
-              onChange={(e) => setTagName(e.target.value)}
-              id="tag-name"
-              placeholder="Tag Name"
-            />
-            <Form.Label htmlFor="tag-name">Tag Name</Form.Label>
-          </Form.Floating>
-        </Modal.Body>
-        <Modal.Footer>
-          <Button variant="secondary" onClick={() => setShowEditTagModal(false)}>
-            Close
-          </Button>
-          <Button variant="primary" onClick={editTag} disabled={tagName.trim() === ''}>
-            Save Changes
-          </Button>
-        </Modal.Footer>
-      </Modal>
+      <TagModal />
     </div>
   );
 }

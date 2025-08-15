@@ -5,57 +5,31 @@ import { GetItemResponse, GetTagResponse } from '@/lib/gen/models';
 import { ItemsApi, TagsApi } from '@/lib/gen/apis';
 import Config from '@/lib/config';
 import { AdminItemCard } from '@/components/ui/admin/AdminItemCard';
-import { Button, Container, Form, Modal, Table } from 'react-bootstrap';
+import { Button, Container, Form, Table } from 'react-bootstrap';
+import ItemModal from '@/components/modals/ItemModal';
+import { useItemModalStore } from '@/lib/stores/itemModalStore';
 
 export default function ItemPage(): React.JSX.Element {
+  const { openCreate, openEdit } = useItemModalStore();
   const [searchValue, setSearchValue] = React.useState('');
   const [items, setItems] = React.useState<Array<GetItemResponse>>([]);
-  const [showCreateModal, setShowCreateModal] = React.useState(false);
-  const [showEditModal, setShowEditModal] = React.useState(false);
   const [loading, setLoading] = React.useState(true);
   const [searchTags, setSearchTags] = React.useState<Array<number>>([]);
-  const [editedItem, setEditedItem] = React.useState<GetItemResponse>({
-    name: '',
-    price: 0,
-    available: true,
-    description: '',
-    imageUrl: '',
-    id: 0,
-    tags: []
-  });
   const [tags, setTags] = React.useState<Array<GetTagResponse>>([]);
-  const [newItem, setNewItem] = React.useState<GetItemResponse>({
-    name: '',
-    price: 0,
-    available: true,
-    description: '',
-    imageUrl: '',
-    id: 0,
-    tags: []
-  });
 
   const createItem = async () => {
     setLoading(true);
-    setShowCreateModal(false);
     const client = new ItemsApi(Config);
+    const { item } = useItemModalStore.getState();
     const createdItem = await client.createItem({
       item: {
-        name: newItem.name,
-        price: newItem.price,
-        available: newItem.available,
-        description: newItem.description,
-        imageUrl: newItem.imageUrl,
-        tags: newItem.tags?.map((t) => t.name || '')
+        name: item.name,
+        price: item.price,
+        available: item.available,
+        description: item.description,
+        imageUrl: item.imageUrl,
+        tags: item.tags?.map((t) => t.name || '')
       }
-    });
-    setNewItem({
-      name: '',
-      price: 0,
-      available: true,
-      description: '',
-      imageUrl: '',
-      id: 0,
-      tags: []
     });
     await searchItems();
     setLoading(false);
@@ -76,27 +50,18 @@ export default function ItemPage(): React.JSX.Element {
   };
 
   const editItem = async () => {
-    setShowEditModal(false);
     const client = new ItemsApi(Config);
+    const { item } = useItemModalStore.getState();
     await client.editItem({
-      id: editedItem.id || 0,
+      id: item.id || 0,
       item: {
-        name: editedItem.name,
-        price: editedItem.price,
-        available: editedItem.available,
-        description: editedItem.description,
-        imageUrl: editedItem.imageUrl,
-        tags: editedItem.tags?.map((t) => t.name || '')
+        name: item.name,
+        price: item.price,
+        available: item.available,
+        description: item.description,
+        imageUrl: item.imageUrl,
+        tags: item.tags?.map((t) => t.name || '')
       }
-    });
-    setEditedItem({
-      name: '',
-      price: 0,
-      available: true,
-      description: '',
-      imageUrl: '',
-      id: 0,
-      tags: []
     });
     await searchItems();
   };
@@ -116,7 +81,7 @@ export default function ItemPage(): React.JSX.Element {
     <div className="flex-fill tabs">
       <div>
         <Container>
-          <Button variant="success" className="w-100 mb-3" onClick={() => setShowCreateModal(true)}>
+          <Button variant="success" className="w-100 mb-3" onClick={() => openCreate(tags, createItem)}>
             Create Item
           </Button>
         </Container>
@@ -189,8 +154,7 @@ export default function ItemPage(): React.JSX.Element {
                       key={index}
                       item={item}
                       onClick={() => {
-                        setEditedItem(item);
-                        setShowEditModal(true);
+                        openEdit(item, tags, editItem);
                       }}
                     />
                   ))
@@ -207,205 +171,7 @@ export default function ItemPage(): React.JSX.Element {
         </Container>
       </div>
 
-      <Modal show={showCreateModal} onHide={() => setShowCreateModal(false)}>
-        <Modal.Header closeButton>
-          <Modal.Title>Create Item</Modal.Title>
-        </Modal.Header>
-        <Modal.Body>
-          <Form.Floating>
-            <Form.Control
-              type="text"
-              id="create-item-name"
-              placeholder="Name"
-              value={newItem.name}
-              onChange={(e) => setNewItem((p) => ({ ...p, name: e.target.value }))}
-            />
-            <Form.Label htmlFor="create-item-name">Name</Form.Label>
-          </Form.Floating>
-          <Form.Floating>
-            <Form.Control
-              type="email"
-              className="mt-2"
-              id="create-item-image"
-              value={newItem.imageUrl}
-              onChange={(e) => setNewItem((p) => ({ ...p, imageUrl: e.target.value }))}
-              placeholder="Image"
-            />
-            <Form.Label htmlFor="create-item-image">Image URL</Form.Label>
-          </Form.Floating>
-          <Form.Floating>
-            <Form.Control
-              type="text"
-              className="mt-2"
-              id="create-item-description"
-              placeholder="Description"
-              value={newItem.description}
-              onChange={(e) => setNewItem((p) => ({ ...p, description: e.target.value }))}
-            />
-            <Form.Label htmlFor="create-item-description">Description</Form.Label>
-          </Form.Floating>
-          <Form.Floating>
-            <Form.Control
-              type="number"
-              className="mt-2"
-              id="create-item-price"
-              value={newItem.price}
-              onChange={(e) => setNewItem((p) => ({ ...p, price: parseInt(e.target.value) || 0 }))}
-              placeholder="Price"
-              min="0"
-            />
-            <Form.Label htmlFor="create-item-price">Price</Form.Label>
-          </Form.Floating>
-          <Form.Label htmlFor="create-item-available">Available: </Form.Label>
-          <Form.Check
-            inline
-            className="mt-3"
-            id="create-item-available"
-            checked={newItem.available}
-            onChange={(e) => setNewItem((p) => ({ ...p, available: e.target.checked }))}
-          />
-          <div className="mt-3" id="create-item-tags">
-            {tags.map((tag, index) => (
-              <Form.Check
-                key={index}
-                inline
-                type="checkbox"
-                id={`create-item-tag-${tag.id}`}
-                checked={newItem.tags?.some((t) => t.id === tag.id)}
-                onChange={() => {
-                  setNewItem((p) => {
-                    const tags = p.tags || [];
-                    if (tags.some((t) => t.id === tag.id)) {
-                      return { ...p, tags: tags.filter((t) => t.id !== tag.id) };
-                    } else {
-                      return { ...p, tags: [...tags, tag] };
-                    }
-                  });
-                }}
-                label={tag.name}
-              />
-            ))}
-          </div>
-        </Modal.Body>
-        <Modal.Footer>
-          <Button variant="secondary" onClick={() => setShowCreateModal(false)}>
-            Close
-          </Button>
-          <Button
-            variant="primary"
-            onClick={createItem}
-            disabled={
-              newItem.name?.trim() === '' ||
-              newItem.price === undefined ||
-              newItem.price <= 0 ||
-              newItem.description?.trim() === '' ||
-              newItem.imageUrl?.trim() === ''
-            }
-          >
-            Save Changes
-          </Button>
-        </Modal.Footer>
-      </Modal>
-
-      <Modal show={showEditModal} onHide={() => setShowEditModal(false)}>
-        <Modal.Header closeButton>
-          <Modal.Title>Edit Item</Modal.Title>
-        </Modal.Header>
-        <Modal.Body>
-          <Form.Floating>
-            <Form.Control
-              type="text"
-              id="edit-item-name"
-              placeholder="Name"
-              value={editedItem.name}
-              onChange={(e) => setEditedItem((p) => ({ ...p, name: e.target.value }))}
-            />
-            <Form.Label htmlFor="edit-item-name">Name</Form.Label>
-          </Form.Floating>
-          <Form.Floating>
-            <Form.Control
-              type="email"
-              className="mt-2"
-              id="edit-item-image"
-              value={editedItem.imageUrl}
-              onChange={(e) => setEditedItem((p) => ({ ...p, imageUrl: e.target.value }))}
-              placeholder="Image"
-            />
-            <Form.Label htmlFor="edit-item-image">Image URL</Form.Label>
-          </Form.Floating>
-          <Form.Floating>
-            <Form.Control
-              type="text"
-              className="mt-2"
-              id="edit-item-description"
-              placeholder="Description"
-              value={editedItem.description}
-              onChange={(e) => setEditedItem((p) => ({ ...p, description: e.target.value }))}
-            />
-            <Form.Label htmlFor="edit-item-description">Description</Form.Label>
-          </Form.Floating>
-          <Form.Floating>
-            <Form.Control
-              type="number"
-              className="mt-2"
-              id="edit-item-price"
-              value={editedItem.price}
-              onChange={(e) => setEditedItem((p) => ({ ...p, price: parseInt(e.target.value) || 0 }))}
-              placeholder="Price"
-              min="0"
-            />
-            <Form.Label htmlFor="edit-item-price">Price</Form.Label>
-          </Form.Floating>
-          <Form.Label htmlFor="edit-item-available">Available: </Form.Label>
-          <Form.Check
-            inline
-            className="mt-3"
-            id="edit-item-available"
-            checked={editedItem.available}
-            onChange={(e) => setEditedItem((p) => ({ ...p, available: e.target.checked }))}
-          />
-          <div className="mt-3" id="edit-item-tags">
-            {tags.map((tag, index) => (
-              <Form.Check
-                key={index}
-                inline
-                type="checkbox"
-                id={`edit-item-tag-${tag.id}`}
-                checked={editedItem.tags?.some((t) => t.id === tag.id)}
-                onChange={() => {
-                  setEditedItem((p) => {
-                    const tags = p.tags || [];
-                    if (tags.some((t) => t.id === tag.id)) {
-                      return { ...p, tags: tags.filter((t) => t.id !== tag.id) };
-                    } else {
-                      return { ...p, tags: [...tags, tag] };
-                    }
-                  });
-                }}
-                label={tag.name}
-              />
-            ))}
-          </div>
-        </Modal.Body>
-        <Modal.Footer>
-          <Button variant="secondary" onClick={() => setShowEditModal(false)}>
-            Close
-          </Button>
-          <Button
-            variant="primary"
-            onClick={editItem}
-            disabled={
-              editedItem.name?.trim() === '' ||
-              editedItem.price === undefined ||
-              editedItem.price <= 0 ||
-              editedItem.description?.trim() === '' ||
-              editedItem.imageUrl?.trim() === ''
-            }
-          >
-            Save Changes
-          </Button>
-        </Modal.Footer>
-      </Modal>
+      <ItemModal />
     </div>
   );
 }

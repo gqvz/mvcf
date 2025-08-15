@@ -19,7 +19,7 @@ const Config = new Configuration({
           window.location.href = '/404';
         } else if (code === 500) {
           alert('An error occurred. Please try again.');
-          window.location.reload();
+          // window.location.reload();
         }
       }
     }
