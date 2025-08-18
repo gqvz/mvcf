@@ -29,6 +29,7 @@ export default function OrdersPage(): React.JSX.Element {
 
   return (
     <Container id="orders-list" className="mt-3 d-flex flex-fill flex-wrap align-content-center justify-content-center">
+      <h1 className="text-center w-100 mt-3"> Past Orders </h1>
       {loading ? (
         <div className="text-center h2">Loading...</div>
       ) : orders.length > 0 ? (
