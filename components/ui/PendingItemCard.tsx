@@ -36,9 +36,10 @@ export default function PendingItemCard({
       <Card.Body className="d-flex align-items-center">
         <h4 className="text-center me-3">{`${orderItem.quantity} x ${item.name}`}</h4>
         <h4 className="text-center me-3 flex-fill">{orderItem.customInstructions}</h4>
+        <h4 className="text-center me-3 flex-fill">{orderItem.status}</h4>
         <div className="h-100 align-content-center">
           <Button variant="success" onClick={() => onClick(orderItem)}>
-            Mark as completed
+            Bump Status
           </Button>
         </div>
       </Card.Body>

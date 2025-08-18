@@ -116,7 +116,7 @@ export default function SearchModal(): React.JSX.Element {
 
           {/* Right Section - Cart */}
           <div className="col-md-4">
-            <div className="border-start ps-3">
+            <div className="border-start h-100 ps-3">
               <h5 className="mb-3">Cart ({cartItemsWithData.length} items)</h5>
               {cartItemsWithData.length === 0 ? (
                 <div className="text-center text-muted">

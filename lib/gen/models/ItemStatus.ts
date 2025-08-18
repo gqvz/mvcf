@@ -18,7 +18,8 @@
  */
 export const ItemStatus = {
   Preparing: 'preparing',
-  Completed: 'completed'
+  Completed: 'completed',
+  Pending: 'pending'
 } as const;
 export type ItemStatus = (typeof ItemStatus)[keyof typeof ItemStatus];
 
